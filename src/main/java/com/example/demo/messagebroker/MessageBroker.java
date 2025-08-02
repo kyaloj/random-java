@@ -24,7 +24,7 @@ public class MessageBroker {
      * @param name The name of the topic.
      */
     public void createTopic(String name) {
-        topics.putIfAbsent(name, new Topic(name));
+        topics.putIfAbsent(name, new InMemoryTopic(name));
     }
 
     /**
@@ -56,29 +56,5 @@ public class MessageBroker {
             throw new IllegalArgumentException("Topic does not exist: " + topicName);
         }
         return topic.getMessage();
-    }
-
-    /**
-     * Represents a single topic queue. It uses a BlockingQueue for thread-safe message handling.
-     */
-    private static class Topic {
-        private final String name;
-        // Using BlockingQueue handles all the synchronization and waiting.
-        private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-
-        public Topic(String name) {
-            this.name = name;
-        }
-
-        public void addMessage(String message) {
-            // offer() is non-blocking and returns false if it can't add.
-            // For an unbounded queue like LinkedBlockingQueue, it always succeeds.
-            queue.offer(message);
-        }
-
-        public String getMessage() throws InterruptedException {
-            // take() is a blocking call. It will wait until a message is available in the queue.
-            return queue.take();
-        }
     }
 }
