@@ -16,7 +16,7 @@ public class MessagingQueueExample {
 
         // Define a topic
         final String topicName = "user-events";
-        broker.createTopic(topicName);
+        broker.createTopic(topicName, TopicStoreType.IN_MEMORY);
 
         // Use an ExecutorService for better thread management
         ExecutorService executor = Executors.newCachedThreadPool();

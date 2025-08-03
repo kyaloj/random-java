@@ -23,9 +23,10 @@ public class Consumer implements Runnable {
                 System.out.println("🔴 Consumer-" + consumerId + " received from '" + topicName + "': " + message);
                 // Simulate processing the message
                 Thread.sleep(500);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 // If interrupted while waiting for a message, stop running.
                 running = false;
+                System.out.println(e);
                 Thread.currentThread().interrupt();
             }
         }

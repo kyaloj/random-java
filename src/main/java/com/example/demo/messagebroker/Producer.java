@@ -20,13 +20,14 @@ public class Producer implements Runnable {
     public void run() {
         int messageCount = 0;
         while (running) {
-            String message = "Message #" + (++messageCount) + " from Producer-" + producerId;
-            broker.publish(topicName, message);
-            System.out.println("✅ Producer-" + producerId + " published to '" + topicName + "': " + message);
             try {
+                String message = "Message #" + (++messageCount) + " from Producer-" + producerId;
+                broker.publish(topicName, message);
+                System.out.println("✅ Producer-" + producerId + " published to '" + topicName + "': " + message);
                 // Simulate some work/delay
                 TimeUnit.MILLISECONDS.sleep((long) (Math.random() * 1000));
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                System.out.println(e);
                 Thread.currentThread().interrupt();
             }
         }

@@ -23,8 +23,13 @@ public class MessageBroker {
      * Creates a new topic if it doesn't already exist.
      * @param name The name of the topic.
      */
-    public void createTopic(String name) {
-        topics.putIfAbsent(name, new InMemoryTopic(name));
+    public void createTopic(String name, TopicStoreType storeType) {
+        Topic topic = switch (storeType) {
+            case DISK -> new DiskTopic(name);
+            case IN_MEMORY -> new InMemoryTopic(name);
+        };
+
+        topics.putIfAbsent(name, topic);
     }
 
     /**
