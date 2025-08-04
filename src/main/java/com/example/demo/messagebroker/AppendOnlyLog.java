@@ -6,12 +6,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AppendOnlyLog implements FileManager {
     private Path logFilePath = null;
     String resourcePath = "messagebroker/events.log";
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
+    private final Lock readLock = readWriteLock.readLock();
+    private final Lock writeLock = readWriteLock.writeLock();
 
     public AppendOnlyLog() {
         try {
@@ -40,8 +45,13 @@ public class AppendOnlyLog implements FileManager {
     @Override
     public void write(String record) throws IOException {
         // StandardOpenOption.APPEND is the key to ensuring we only add to the end.
-        Files.writeString(this.logFilePath, record + System.lineSeparator(),
-                StandardOpenOption.APPEND);
+        writeLock.lock();
+        try {
+            Files.writeString(this.logFilePath, record + System.lineSeparator(),
+                    StandardOpenOption.APPEND);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -52,8 +62,12 @@ public class AppendOnlyLog implements FileManager {
      */
     @Override
     public List<String> read(long offset) throws IOException {
+        // Use a simple locking mechanism to avoid race conditions.
+        readLock.lock();
         try (Stream<String> lines = Files.lines(this.logFilePath)) {
             return lines.skip(offset).collect(Collectors.toList());
+        } finally {
+            readLock.unlock();
         }
     }
 }
