@@ -12,6 +12,7 @@ public class MessageBroker {
     private static final MessageBroker INSTANCE = new MessageBroker();
     // A map where the key is the topic name and the value is the Topic object.
     private final Map<String, Topic> topics = new ConcurrentHashMap<>();
+    private final FileManager log = new AppendOnlyLog();
 
     private MessageBroker() {}
 
@@ -25,7 +26,7 @@ public class MessageBroker {
      */
     public void createTopic(String name, TopicStoreType storeType) {
         Topic topic = switch (storeType) {
-            case DISK -> new DiskTopic(name);
+            case DISK -> new DiskTopic(name, log);
             case IN_MEMORY -> new InMemoryTopic(name);
         };
 
